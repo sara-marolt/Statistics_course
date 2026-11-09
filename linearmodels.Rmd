@@ -1,0 +1,109 @@
+---
+title: "Linear models"
+output: html_document
+date: "2026-11-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Readin the data file:
+```{r}
+library(readr)
+birds <- read_csv("~/Desktop/PhD/Courses/Statistics course/bird_allometry.csv")
+head(birds)
+```
+
+Based on these data, we will estimate the allometric slopes and intercepts for the brain-body scaling, and
+ask whether these are similar in males and females. To do so, we start by splitting the data into males and
+females.
+```{r}
+males = birds[birds$Sex=="m",]
+females = birds[birds$Sex=="f",]
+```
+
+
+Then, we fit linear models to log-transformed brain- and body-sizes.
+
+```{r}
+mm = lm(log(brain_mass)~log(body_mass), data=males)
+mf = lm(log(brain_mass)~log(body_mass), data=females)
+```
+
+And then checking the residuals:
+
+For the males
+```{r}
+hist(residuals(mm))
+```
+
+For the females
+```{r}
+hist(residuals(mf))
+```
+And then looking at the summaries of the models:
+
+```{r}
+summary(mm)
+```
+
+```{r}
+summary(mf)
+```
+
+Based on the standard errors of the slopes, the difference appears statistically supported. What kind of analysis could we do to directly estimate the difference in slope between males and females?
+
+A t -test could be completed to look at the difference between the two independent samples
+
+Let us now produce a scatterplot illustrating our results. Can you find out from the data which are the
+species that fall outside the main cloud (e.g. on the upper right)?
+
+Firstly, making a scatter plot of the data:
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+both <- bind_rows(
+  mutate(males,   sex = "Male"),
+  mutate(females, sex = "Female")
+)
+
+ggplot(both, aes(x = log(body_mass), y = log(brain_mass), colour = sex)) +
+  geom_point(size = 2.5, alpha = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 0.8) +
+  scale_colour_manual(values = c(Male = "steelblue", Female = "tomato")) +labs(
+    x = "Body mass (log g)",
+    y = "Brain mass (log g)",
+    colour = "Sex"
+  ) +
+  theme_minimal() 
+```
+Then looking at what the outlier species are:
+
+```{r}
+par(mfrow = c(2, 2))
+plot(mm)
+```
+Species 546, 571 and 11 for males
+
+```{r}
+males[546,1]
+males[571,1]
+males[11,1]
+```
+Struthio camelus, Tetrao urogallus and Aegithalos caudatus
+
+```{r}
+par(mfrow = c(2, 2))
+plot(mf)
+```
+And 197, 42 and 322 for females
+
+```{r}
+females[197,1]
+females[42,1]
+females[322,1]
+```
+Gallinago gallinago, Anodorhynchus hyacinthinus and Pavo cristatus
