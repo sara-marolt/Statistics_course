@@ -1,0 +1,28 @@
+---
+title: "ANOVA"
+output: html_document
+date: "2026-11-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Data exercise: analysing a factorial experiment
+
+```{r}
+library(readr)
+butterflies <- read_csv("~/Desktop/PhD/Courses/Statistics course/butterflies.csv")
+names(butterflies)
+```
+The following data are from an experiment where **female butterflies reared on two different host plants** were allowed to oviposit on the same two host plants. The data include developmental time for the larvae, the adult weight, and the growth rate of the larvae.
+
+Analyse the data to assess effects of maternal vs. larval host plant on one or more response variable. Interpret the results and produce a nice plot to illustrate.
+
+```{r}
+butterflies$MaternalHost = paste0(butterflies$MaternalHost, "M")
+butterflies$LarvalHost = paste0(butterflies$LarvalHost, "L")
+means = tapply(butterflies$DevelopmentTime, list(butterflies$MaternalHost, butterflies$LarvalHost), mean)
+means
+```
+
