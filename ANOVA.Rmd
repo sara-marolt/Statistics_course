@@ -10,19 +10,127 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Data exercise: analysing a factorial experiment
 
-```{r}
+```{r, include=FALSE}
 library(readr)
-butterflies <- read_csv("~/Desktop/PhD/Courses/Statistics course/butterflies.csv")
+butterflies <- read_csv("Statistics course/butterflies.csv")
 names(butterflies)
 ```
 The following data are from an experiment where **female butterflies reared on two different host plants** were allowed to oviposit on the same two host plants. The data include developmental time for the larvae, the adult weight, and the growth rate of the larvae.
 
 Analyse the data to assess effects of maternal vs. larval host plant on one or more response variable. Interpret the results and produce a nice plot to illustrate.
 
+So this gives us a 2x2 factorial experimental design
+
+Does the host plant on which a female was reared (maternal host) affect the performance of her offspring independently of, or in interaction with, the host plant the offspring themselves feed on (larval host)?
+And more specifically:
+Do larvae perform better (adult weight and development time) on the host plant their mother was reared on than on the alternative host? 
+
+I am going to assume that growth rate is a combination of adult weight and development time so using them independantly allows me to detangle the effects of maternal host and larval host. 
+
+So we can start by looking at the effect of maternal and larval host on adult weight:
+
+First I can look at means across different groups:
 ```{r}
 butterflies$MaternalHost = paste0(butterflies$MaternalHost, "M")
 butterflies$LarvalHost = paste0(butterflies$LarvalHost, "L")
+means = tapply(butterflies$AdultWeight, list(butterflies$MaternalHost, butterflies$LarvalHost), mean)
+means
+```
+
+
+
+To begin analysing the results, we start by looking at the output of the ANOVA table. 
+```{r}
+adultweight <- lm(AdultWeight ~ MaternalHost * LarvalHost, data = butterflies)
+anova(adultweight)
+```
+The larval host plan has the strongest effect on the adult weight, as most of the variance is explained by this factor. This can be seen in the table as LarvalHost has the largest sum of squares (Sum sq)
+
+We can then look at the summary table to get a better idea of how the group is affecting the Adult weight.
+
+```{r}
+summary(adultweight)
+```
+We can then plot this result in a ggplot graph:
+
+```{r}
+library(ggplot2)
+
+ a <- ggplot(butterflies,
+       aes(x = LarvalHost, y = AdultWeight,
+           colour = MaternalHost, linetype = MaternalHost, group = MaternalHost)) +
+  stat_summary(fun = mean, geom = "line", linewidth = 0.9) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.05) +
+  stat_summary(fun = mean, geom = "point", size = 3.5) +
+  scale_colour_manual(values = c("seagreen", "darkorange")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  labs(x = "Larval host",
+       y = "Adult weight (g)",
+       colour = "Maternal host", linetype = "Maternal host") +
+  theme_classic(base_size = 14) +
+  theme(
+    panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.8),
+    axis.line = element_blank(),
+    axis.title.x = element_text(margin = margin(t = 10)),
+    axis.title.y = element_text(margin = margin(r = 10)),
+    legend.position = "none",
+    legend.position.inside = c(0.6, 0.98),
+    legend.justification = c(0, 1),
+    legend.background = element_blank(),
+    legend.key.width = unit(1.5, "cm")
+  ) + theme(aspect.ratio = 1)
+```
+
+We can then move to look at developmental time:
+
+```{r}
 means = tapply(butterflies$DevelopmentTime, list(butterflies$MaternalHost, butterflies$LarvalHost), mean)
 means
+```
+
+We then fit the linear model:
+
+```{r}
+devtime <- lm(DevelopmentTime ~ MaternalHost * LarvalHost, data = butterflies)
+anova(devtime)
+```
+Both maternal and larval host affects development time, however Larval host has a stronger effect as can be seen by the larger sum of mean squares. So we can then look at the summary table to get a better idea:
+```{r}
+summary(devtime)
+```
+
+
+```{r}
+library(ggplot2)
+
+b <- ggplot(butterflies,
+       aes(x = LarvalHost, y = DevelopmentTime,
+           colour = MaternalHost, linetype = MaternalHost, group = MaternalHost)) +
+  stat_summary(fun = mean, geom = "line", linewidth = 0.9) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.05) +
+  stat_summary(fun = mean, geom = "point", size = 3.5) +
+  scale_colour_manual(values = c("seagreen", "darkorange")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  labs(x = "Larval host",
+       y = "Development time (days)",
+       colour = "Maternal host", linetype = "Maternal host") +
+  theme_classic(base_size = 14) +
+  theme(
+    panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.8),
+    axis.line = element_blank(),
+    axis.title.x = element_text(margin = margin(t = 10)),
+    axis.title.y = element_text(margin = margin(r = 10)),
+    legend.position = "right",
+    legend.justification = "center",
+    legend.background = element_blank(),
+    legend.key.width = unit(1.5, "cm")
+  )+ theme(aspect.ratio = 1)+ theme(aspect.ratio = 1)
+```
+
+And to put the graphs together
+
+```{r}
+library(patchwork)
+a + b
 ```
 
