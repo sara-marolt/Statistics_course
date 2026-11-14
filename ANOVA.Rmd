@@ -38,6 +38,9 @@ means
 ```
 
 
+```{r}
+(53.50364-65.35490)/65.35490 *100
+```
 
 To begin analysing the results, we start by looking at the output of the ANOVA table. 
 ```{r}
@@ -50,13 +53,15 @@ We can then look at the summary table to get a better idea of how the group is a
 
 ```{r}
 summary(adultweight)
+par(mfrow = c(2, 2))
+plot(adultweight)
 ```
 We can then plot this result in a ggplot graph:
 
 ```{r}
 library(ggplot2)
 
- a <- ggplot(butterflies,
+ a <-ggplot(butterflies,
        aes(x = LarvalHost, y = AdultWeight,
            colour = MaternalHost, linetype = MaternalHost, group = MaternalHost)) +
   stat_summary(fun = mean, geom = "line", linewidth = 0.9) +
@@ -65,7 +70,7 @@ library(ggplot2)
   scale_colour_manual(values = c("seagreen", "darkorange")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   labs(x = "Larval host",
-       y = "Adult weight (g)",
+       y = "Adult weight (mg)",
        colour = "Maternal host", linetype = "Maternal host") +
   theme_classic(base_size = 14) +
   theme(
@@ -88,6 +93,11 @@ means = tapply(butterflies$DevelopmentTime, list(butterflies$MaternalHost, butte
 means
 ```
 
+```{r}
+(5.3039/21.69608)
+```
+
+
 We then fit the linear model:
 
 ```{r}
@@ -97,6 +107,8 @@ anova(devtime)
 Both maternal and larval host affects development time, however Larval host has a stronger effect as can be seen by the larger sum of mean squares. So we can then look at the summary table to get a better idea:
 ```{r}
 summary(devtime)
+par(mfrow = c(2, 2))
+plot(devtime)
 ```
 
 
