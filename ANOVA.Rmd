@@ -38,10 +38,6 @@ means
 ```
 
 
-```{r}
-(53.50364-65.35490)/65.35490 *100
-```
-
 To begin analysing the results, we start by looking at the output of the ANOVA table. 
 ```{r}
 adultweight <- lm(AdultWeight ~ MaternalHost * LarvalHost, data = butterflies)
@@ -91,10 +87,6 @@ We can then move to look at developmental time:
 ```{r}
 means = tapply(butterflies$DevelopmentTime, list(butterflies$MaternalHost, butterflies$LarvalHost), mean)
 means
-```
-
-```{r}
-(5.3039/21.69608)
 ```
 
 
